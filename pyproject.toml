@@ -1,0 +1,17 @@
+[tool.pdm]
+
+[project]
+name = "AWSomeLib"
+version = "0.1.0"
+description = "A small module to use fastapi like decorators with AWS lambda and API gateway"
+authors = [
+    {name = "Mariano Carrazana", email = "marianocarrazana@gmail.com"},
+]
+dependencies = []
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
