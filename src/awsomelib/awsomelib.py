@@ -1,9 +1,13 @@
 import re
 from inspect import signature, _empty
 from uuid import UUID
+from typing import Union
 
 from . import state
-from .custom_types import GithubHash
+
+UUID_REGEX = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I
+)
 
 
 class AWSomeApp:
@@ -93,29 +97,33 @@ class AWSomeApp:
 
         return decorator
 
-    def __add_route(self, method: str, route: str, callback):
+    def __add_route(self, method: str, route: str, callback) -> None:
         regexp = route.replace("/", "/")
         print(f"{regexp=}")
-        with_names = re.sub(r"{([^\/:]+)(:[^\/]*)?}", "(?P<\\1>[^\/]+)", regexp)
+        with_names = re.sub(r"{([^\/:]+)(:[^\/]*)?}", r"(?P<\1>[^\/]+)", regexp)
         final_route = f"^{method} {with_names}$"
         print(f"{final_route=}")
         self.__routes.append({"route": final_route, "callback": callback})
 
     @staticmethod
-    def type_converter(word: str):
+    def type_converter(word: str) -> Union[int, float, UUID, str]:
+        """Convert a string param to its equivalent type in python
+
+        Parameters
+        ----------
+        word : str
+            A string to convert
+
+        Returns
+        -------
+        Union[int, float, UUID, str]
+            Returns the string converted to its equivalent type
+        """
         if re.match(r"^(-|\+)?\d+$", word):  # is int
             return int(word)
         elif re.match(r"^(\+|-)?\d*\.\d+$", word):  # is float
             return float(word)
-        elif re.match(
-            r"^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$",
-            word,
-            re.IGNORECASE,
-        ):  # is a uuid
+        elif UUID_REGEX.match(word):  # is a uuid
             return UUID(word)
-        try:  # is github hash
-            hash_obj = GithubHash(word)
-            return hash_obj
-        except Exception as e:  # is a string maybe?
-            print(e)
+        else:  # just return the string
             return word
